@@ -11,16 +11,9 @@ function adj(k,v){if(k==='sc'){curS=Math.max(0.5,Math.min(1.5,curS+v));document.
 function openM(){$('md').classList.toggle('active')}
 function openEx(){$('exM').classList.add('active')}
 
-function upExD(){const s=$('exSel').value;if(s==='custom'){$('custOpts').style.display='grid';exams.custom.wpm=$('cWpm').value;exams.custom.dur=$('cDur').value}else{$('custOpts').style.display='grid'}
-const e=exams[s];$('cWpm').value=e.wpm;$('cDur').value=e.dur;$('cLg').value=e.rules.wc;$('cCap').value=e.rules.cap;$('cCom').value=e.rules.com;$('cPun').value=e.rules.pun;$('cSpl').value=e.rules.spl;$('cSub').value=e.rules.sub;$('cMaxE').value=e.rules.max;
-$('exDesc').innerText=`${e.name} | ${e.dur}m @ ${e.wpm}wpm | Rules: ${e.rules.wc.toUpperCase()}`}
+function upExD(){const s=$('exSel').value,m=$('exMode').value;if(s==='custom'){$('custOpts').style.display='flex';exams.custom.wpm=$('cWpm').value;exams.custom.dur=$('cDur').value}else{$('custOpts').style.display='none'}const e=exams[s];$('exDesc').innerText=`${e.name} | ${e.dur}m @ ${e.wpm}wpm | Rules: ${e.rules.wc.toUpperCase()}`;if(s==='custom')e.rules={cap:$('cCap').value,com:$('cCom').value,pun:$('cPun').value,spl:$('cSpl').value,sub:$('cSub').value,wc:$('cLg').value,max:$('cMaxE').value}}
 
-function selEx(){curEx=$('exSel').value;exMode=$('exMode').value;
-const r={cap:$('cCap').value,com:$('cCom').value,pun:$('cPun').value,spl:$('cSpl').value,sub:$('cSub').value,wc:$('cLg').value,max:$('cMaxE').value};
-exams.custom.wpm=$('cWpm').value;exams.custom.dur=$('cDur').value;exams.custom.rules=r;
-exRules=curEx==='custom'?r:exams[curEx].rules;$('lg').value=exRules.wc;
-const e=curEx==='custom'?exams.custom:exams[curEx];$('trT').value=e.trans||0;$('trC').value=e.trans||0;$('wi').value=e.wpm;sync('w');
-$('exM').classList.remove('active');$('srcM').classList.add('active')}
+function selEx(){curEx=$('exSel').value;exMode=$('exMode').value;exRules={...exams[curEx].rules};$('lg').value=exRules.wc;$('exM').classList.remove('active');$('srcM').classList.add('active')}
 
 async function lG(u){let list=[];try{for(let r of(u?[regs.find(x=>x.u===u)]:regs)){const res=await fetch(`https://gist.githubusercontent.com/vs-parihar/${r.u}/raw?t=${Date.now()}`);const j=await res.json();if(Array.isArray(j))list=list.concat(j.map(i=>({...i,reg:r.t})))}}catch(e){}lD(list);renT();renL()}
 
