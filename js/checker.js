@@ -1,51 +1,70 @@
-let algn=[];
+let algn=[],popEl=null;
 function opTr(){if(!$('tx').value.trim()&&exMode!=='mock'){alert('Load text first!');return}if(is){au.pause();is=0;updatePlBtn()}$('trM').classList.add('active');resTr();$('trA').disabled=0}
 function tryClTr(){if(exMode==='mock'&&trIp){return}if($('rsV').style.display==='flex'){$('trM').classList.remove('active');return}if(trIp||$('trI').value.length>0){$('cfm').style.display='flex'}else{$('trM').classList.remove('active')}}
 function cfmAct(a){$('cfm').style.display='none';if(a==='d'){$('trM').classList.remove('active');resTr()}else if(a==='s'){subTr()}}
-function resTr(){trIp=0;clearInterval(trTi);$('trI').value='';$('trI').disabled=1;$('trA').disabled=0;$('trA').innerText='Start';$('trCD').textContent='00:00';$('trV').style.display='flex';$('rsV').style.display='none';$('trInf').textContent='Ready'}
+function resTr(){trIp=0;clearInterval(trTi);$('trI').value='';$('trI').disabled=1;$('trA').disabled=0;$('trA').innerText='Start';$('trCD').textContent='00:00';$('trV').style.display='flex';$('rsV').style.display='none';$('trInf').textContent='Ready';$('cfBox').style.display='none'}
 function togTr(){if(trIp){subTr()}else{stTr(false)}}
 function stTr(a=false){const v=parseFloat($('trT').value)||parseFloat($('trC').value)||0;trStopW=(v===0);trDur=v*60;trRem=v*60;trElap=0;trIp=1;$('trI').disabled=0;$('trI').value=$('trI').value||'';$('trI').focus();$('trA').innerText='Submit';if(exMode==='mock')$('trA').innerText='Submit (Early)';clearInterval(trTi);trTi=setInterval(()=>{if(trStopW)trElap++;else trRem--;let t=trStopW?trElap:trRem,m=Math.floor(t/60),s=t%60;$('trCD').textContent=`${m}:${s<10?'0':''}${s}`;if(!trStopW&&trRem<=0)subTr()},1000)}
 
-function subTr(){clearInterval(trTi);trIp=0;$('trI').disabled=1;$('trA').innerText='Start';const srcT=$('chkFull').checked?origTxt:$('tx').value;oToks=tok(srcT);uToks=tok($('trI').value);const m=oToks.length,n=uToks.length,d=Array.from({length:m+1},()=>new Float32Array(n+1).fill(1e9)),p=Array.from({length:m+1},()=>new Int8Array(n+1).fill(0));d[0][0]=0;
+function subTr(){clearInterval(trTi);trIp=0;$('trI').disabled=1;$('trA').innerText='Start';const srcT=$('chkFull').checked?origTxt:$('tx').value;
+oToks=tok(srcT);uToks=tok($('trI').value);const m=oToks.length,n=uToks.length,d=Array.from({length:m+1},()=>new Float32Array(n+1).fill(1e9)),p=Array.from({length:m+1},()=>new Int8Array(n+1).fill(0));d[0][0]=0;
 for(let i=0;i<=m;i++)for(let j=0;j<=n;j++){
 if(i<m&&d[i+1][j]>d[i][j]+1){d[i+1][j]=d[i][j]+1;p[i+1][j]=1}
 if(j<n&&d[i][j+1]>d[i][j]+1){d[i][j+1]=d[i][j]+1;p[i][j+1]=2}
-if(i<m&&j<n){const c=cmpW(oToks[i].t,uToks[j].t);const raw=oToks[i].t===uToks[j].t?0:0.1;if(d[i+1][j+1]>d[i][j]+c+raw){d[i+1][j+1]=d[i][j]+c+raw;p[i+1][j+1]=0}}
-if(i<m&&j<n-1){const cm=cmpW(oToks[i].t,uToks[j].t+uToks[j+1].t);if(d[i+1][j+2]>d[i][j]+cm+2){d[i+1][j+2]=d[i][j]+cm+2;p[i+1][j+2]=3}}
-if(i<m-1&&j<n){const cs=cmpW(oToks[i].t+oToks[i+1].t,uToks[j].t);if(d[i+2][j+1]>d[i][j]+cs+2){d[i+2][j+1]=d[i][j]+cs+2;p[i+2][j+1]=4}}}
-algn=[];let i=m,j=n;while(i>0||j>0){const op=p[i][j];if(op===0){const c=cmpW(oToks[i-1].t,uToks[j-1].t),raw=oToks[i-1].t!==uToks[j-1].t;algn.unshift({t:(c===0&&!raw)?'k':(c===0?'w':'w'),o:oToks[i-1],u:uToks[j-1],i:i-1,j:j-1,w:c});i--;j--}
+if(i<m&&j<n){const o=oToks[i],u=uToks[j];let c=0,raw=0;if(o.isP||u.isP){c=(o.c===u.c)?0:1;raw=0}else{c=cmpW(o,u);raw=o.c===u.c?0:0.1}if(d[i+1][j+1]>d[i][j]+c+raw){d[i+1][j+1]=d[i][j]+c+raw;p[i+1][j+1]=0}}
+if(i<m&&j<n-1&&!oToks[i].isP&&!uToks[j].isP){const cm=cmpW(oToks[i],{c:uToks[j].c+uToks[j+1].c});if(d[i+1][j+2]>d[i][j]+cm+2){d[i+1][j+2]=d[i][j]+cm+2;p[i+1][j+2]=3}}
+if(i<m-1&&j<n&&!oToks[i].isP&&!uToks[j].isP){const cs=cmpW({c:oToks[i].c+oToks[i+1].c},uToks[j]);if(d[i+2][j+1]>d[i][j]+cs+2){d[i+2][j+1]=d[i][j]+cs+2;p[i+2][j+1]=4}}}
+algn=[];let i=m,j=n;while(i>0||j>0){const op=p[i][j];if(op===0){const o=oToks[i-1],u=uToks[j-1];let t='k',w=0;if(o.isP||u.isP){if(o.c!==u.c){t='w';w=0.5}}else{const c=cmpW(o,u);w=c;if(c>0)t='w';else if(o.c!==u.c)t='k'}algn.unshift({t,o,u,i:i-1,j:j-1,w});i--;j--}
 else if(op===1){algn.unshift({t:'m',o:oToks[i-1],i:i-1,j:-1});i--}
 else if(op===2){algn.unshift({t:'f',u:uToks[j-1],j:j-1,i:-1});j--}
 else if(op===3){algn.unshift({t:'h',o:oToks[i-1],u:{t:uToks[j-2].t+" "+uToks[j-1].t},i:i-1,j:j-2,msg:'Split',w:0.5});i--;j-=2}
 else if(op===4){algn.unshift({t:'h',o:{t:oToks[i-2].t+" "+oToks[i-1].t},u:uToks[j-1],i:i-2,j:j-1,msg:'Merge',w:0.5});i-=2;j--}}
 errs=algn.filter(x=>x.t!=='k').map((e,idx)=>({...e,id:idx}));$('trV').style.display='none';$('rsV').style.display='flex';$('tx').style.visibility='visible';reCalc()}
 
-function reCalc(){let tE=0,tot=oToks.length;const r=exRules.max?exRules:{max:100,wc:'s',sub:'s',spl:0.5,cap:0,pun:0.5,com:0};
+function reCalc(){let tE=0,tot=oToks.filter(x=>!x.isP).length;const r=exRules;
 errs.forEach(e=>{let v=0;
 if(e.ovr!==undefined){v=e.ovr}else{
 if(e.t==='f'){v=r.sub==='d'?1:0.5}else if(e.t==='m'){v=1}
 else if(e.t==='h'){v=parseFloat(r.spl)}
-else if(e.t==='w'){if(e.w>=1){v=1}else{v=0;if(parseFloat(r.cap)>0&&e.o.t[0]!==e.u.t[0])v=Math.min(1,Math.max(v,parseFloat(r.cap)));if(e.o.t.match(/[.?!|\-]/)&&!e.u.t.match(/[.?!|\-]/))v=Math.min(1,Math.max(v,parseFloat(r.pun)))}}}
+else if(e.t==='w'){if(e.o.isP||e.u.isP){if(e.o.c===',')v=parseFloat(r.com);else v=parseFloat(r.pun)}else{if(e.w>=1){v=1}else{v=0;if(parseFloat(r.cap)>0&&e.o.c[0]!==e.u.c[0])v=Math.min(1,Math.max(v,parseFloat(r.cap)))}}}}
 e.val=v;tE+=v});const acc=Math.max(0,100-(tE/tot*100)),pass=acc>=(100-parseFloat(r.max));$('resBox').style.display='flex';$('resBox').style.borderColor=pass?'var(--gr)':'var(--re)';$('resTit').innerHTML=`<span style="color:${pass?'var(--gr)':'var(--re)'}">${pass?'PASSED':'FAILED'}</span>`;$('resDet').innerHTML=`Errors: <b>${tE.toFixed(1)}</b> / ${tot} (${(tE/tot*100).toFixed(1)}%)<br>Accuracy: <b>${acc.toFixed(1)}%</b>`;renCheckV();renEL()}
 
 function renCheckV(){const v=$('checkV'),sd=exRules.sub==='d';v.innerHTML='';algn.forEach((x,k)=>{let s=document.createElement('span');s.id=`mk-${x.id}`;
-if(x.t==='k'){s.className='c-ok';s.textContent=x.o.t+' '}
-else if(x.t==='m'){s.className='c-del';s.textContent=x.o.t+' ';s.onclick=()=>jump(x.id)}
-else if(x.t==='f'){s.className='c-ins';s.textContent=x.u.t+' ';s.onclick=()=>jump(x.id)}
-else{if(sd&&x.val>=1&&x.w>=1){s.innerHTML=`<span class="c-del">${x.o.t}</span> <span class="c-ins">${x.u.t}</span> `}else{s.className='c-grp';s.innerHTML=`<span class="${x.val>=1?'c-sub-f':'c-sub-h'}">${x.u.t}<span class="c-cor">(${x.o.t})</span></span> `}s.onclick=()=>jump(x.id)}
-v.appendChild(s)})}
+if(x.t==='k'){s.className='c-ok';s.textContent=x.o.t+' ';s.onclick=(e)=>openMenu(e,x.id,true)}
+else if(x.t==='m'){s.className='c-del';s.innerHTML=`${x.o.t}<sub class="err-sub">${x.val}</sub> `;s.onclick=(e)=>openMenu(e,x.id)}
+else if(x.t==='f'){s.className='c-ins';s.innerHTML=`${x.u.t}<sub class="err-sub">${x.val}</sub> `;s.onclick=(e)=>openMenu(e,x.id)}
+else{
+    if(x.ovr===2||(sd&&x.val>=1&&x.w>=1&&!x.ovr)){s.innerHTML=`<span class="c-del">${x.o.t}<sub class="err-sub">1</sub></span> <span class="c-ins">${x.u.t}<sub class="err-sub">1</sub></span> `}
+    else if(x.ovr===3){s.innerHTML=`<span class="c-dub">${x.u.t}<sub class="err-sub">${x.val}</sub></span> `}
+    else{s.className='c-grp';s.innerHTML=`<span class="${x.val>=1?'c-sub-f':'c-sub-h'}">${x.u.t}<span class="c-cor">(${x.o.t})</span><sub class="err-sub">${x.val}</sub></span> `}
+    s.onclick=(e)=>openMenu(e,x.id)
+}v.appendChild(s)})}
 
 function renEL(){const l=$('eL');l.innerHTML='';errs.forEach(e=>{const it=document.createElement('div');it.className='e-it';it.id=`err-${e.id}`;it.onclick=()=>jump(e.id);
 it.innerHTML=`<div class="row" style="margin:0"><span class="e-ctx">${getCtx(oToks,e.i,2,-1)}</span><span class="e-w ${e.val>=1?'m-err':(e.t==='f'?'c-ins':(e.t==='m'?'c-del':'m-h'))}">${e.t==='m'?e.o.t:e.u.t}</span><span class="e-ctx">${getCtx(oToks,e.i,2,1)}</span><span style="font-size:9px;opacity:0.7;margin-left:auto">(-${e.val})</span></div>
 <div class="row" style="margin-top:2px;justify-content:flex-end">
-<button class="op-btn ${e.val===1?'op-act':''}" onclick="upEr(event,${e.id},1)">F</button><button class="op-btn ${e.val===0.5?'op-act':''}" onclick="upEr(event,${e.id},0.5)">H</button><button class="op-btn ${e.ovr===2?'op-act':''}" onclick="upEr(event,${e.id},2)">D</button><button class="op-btn ${e.val===0?'op-act':''}" onclick="upEr(event,${e.id},0)">X</button></div>`;l.appendChild(it)})}
+<button class="op-btn ${e.val===1?'op-act':''}" onclick="upEr(event,${e.id},1)">F</button><button class="op-btn ${e.val===0.5?'op-act':''}" onclick="upEr(event,${e.id},0.5)">H</button>
+<button class="op-btn ${e.ovr===2?'op-act':''}" onclick="upEr(event,${e.id},2)">D</button>
+<button class="op-btn ${e.ovr===3?'op-act':''}" onclick="upEr(event,${e.id},3)">DE</button>
+<button class="op-btn ${e.val===0?'op-act':''}" onclick="upEr(event,${e.id},0)">X</button>
+<button class="op-btn" onclick="cmb(event,${e.id})" style="width:auto;padding:0 2px">${e.ovr===2||(exRules.sub==='d'&&e.w>=1)?'Comb':'Split'}</button></div>`;l.appendChild(it)})}
 
 function getCtx(tk,idx,c,dir){if(idx<0)return"";let s=[],cnt=0,curr=idx+dir;while(cnt<c&&curr>=0&&curr<tk.length){if(dir<0)s.unshift(tk[curr].t);else s.push(tk[curr].t);curr+=dir;cnt++}return s.join(' ')}
-
 function jump(id){if(id===undefined)return;const e=errs.find(x=>x.id===id);if(!e)return;clrHl();
 const el=$(`mk-${id}`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});
 let p=el.previousElementSibling,n=el.nextElementSibling;for(let k=0;k<2;k++){if(p){p.classList.add('ctx-hl');p=p.previousElementSibling}if(n){n.classList.add('ctx-hl');n=n.nextElementSibling}}}
 $(`err-${id}`)?.scrollIntoView({behavior:'smooth',block:'center'});[...$('eL').children].forEach(c=>c.classList.remove('active'));$(`err-${id}`)?.classList.add('active')}
 
 function clrHl(){[...document.querySelectorAll('.ctx-hl')].forEach(e=>e.classList.remove('ctx-hl'))}
-function upEr(ev,id,v){ev.stopPropagation();const e=errs.find(x=>x.id===id);if(e){e.ovr=v;reCalc();jump(id)}}
+function upEr(ev,id,v){ev.stopPropagation();if(popEl)popEl.remove();const e=errs.find(x=>x.id===id);if(e){e.ovr=v;reCalc();jump(id)}}
+function cmb(ev,id){ev.stopPropagation();if(popEl)popEl.remove();const e=errs.find(x=>x.id===id);if(e){if(e.ovr===2)e.ovr=undefined;else e.ovr=2;reCalc();jump(id)}}
+
+function openMenu(e,id,fresh=false){e.stopPropagation();if(popEl)popEl.remove();jump(id);
+const m=document.createElement('div');m.className='pop-menu';m.style.left=e.pageX+'px';m.style.top=e.pageY+'px';
+if(fresh){m.innerHTML=`<button class="pop-btn" onclick="mkErr(${id},1)">Mark Full</button><button class="pop-btn" onclick="mkErr(${id},0.5)">Mark Half</button><button class="pop-btn" onclick="mkErr(${id},'ins')">Mark Insert</button>`;}
+else{m.innerHTML=`<button class="pop-btn" onclick="upEr(event,${id},1)">Full Err</button><button class="pop-btn" onclick="upEr(event,${id},0.5)">Half Err</button><button class="pop-btn" onclick="upEr(event,${id},2)">Double</button><button class="pop-btn" onclick="upEr(event,${id},0)">Ignore</button>`;}
+document.body.appendChild(m);popEl=m;document.onclick=()=>{if(popEl){popEl.remove();popEl=null}}}
+
+function mkErr(id,v){if(popEl)popEl.remove();const a=algn[id];if(!a)return;
+const err={...a,id:errs.length,ovr:typeof v==='number'?v:1,t:v==='ins'?'f':'w'};if(v==='ins')err.u={t:'[INS]',c:''};
+errs.push(err);reCalc();jump(err.id)}
