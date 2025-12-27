@@ -23,10 +23,11 @@ errs.forEach(e=>{let v=0;if(e.ovr!==undefined){v=e.ovr}else{if(e.t==='f'){v=r.su
 else if(e.t==='h'){v=parseFloat(r.spl)}
 else if(e.t==='w'){if(e.w>=1){v=1}else{v=0;if(parseFloat(r.cap)>0&&e.o.t[0]!==e.u.t[0])v=Math.min(1,Math.max(v,parseFloat(r.cap)));if(e.o.t.match(/[.?!|\u0964]/)&&!e.u.t.match(/[.?!|\u0964]/))v=Math.min(1,Math.max(v,parseFloat(r.pun)))}}}
 e.val=v;tE+=v});const acc=Math.max(0,100-(tE/tot*100)),pass=acc>=(100-parseFloat(r.max));$('resBox').style.display='flex';$('resBox').style.borderColor=pass?'var(--gr)':'var(--re)';$('resTit').innerHTML=`<span style="color:${pass?'var(--gr)':'var(--re)'}">${pass?'PASSED':'FAILED'}</span>`;$('resDet').innerHTML=`Errors: <b>${tE.toFixed(1)}</b> / ${tot} (${(tE/tot*100).toFixed(1)}%)<br>Accuracy: <b>${acc.toFixed(1)}%</b>`;renCheckV();renEL()}
-function renCheckV(){const v=$('checkV');v.innerHTML='';algn.forEach((x,k)=>{let s=document.createElement('span');s.id=`mk-${x.id}`;if(x.t==='k'){s.className='c-ok';s.textContent=x.o.t+' '}
-else if(x.t==='m'){s.className='c-del';s.textContent=x.o.t+' ';s.onclick=()=>jump(x.id)}
+function renCheckV(){const v=$('checkV'),splitPun=s=>{const m=s.match(/^(.*?)([^\w\u0900-\u097F\s\-]*)$/);return m?[m[1],m[2]]:[s,'']};v.innerHTML='';algn.forEach((x,k)=>{let s=document.createElement('span');s.id=`mk-${x.id}`;
+if(x.t==='k'){s.className='c-ok';s.textContent=x.o.t+' '}
+else if(x.t==='m'){const [w,p]=splitPun(x.o.t);s.innerHTML=`<span class="c-ok">${w}</span><span class="c-del">${p}</span> `;s.onclick=()=>jump(x.id)}
 else if(x.t==='f'){s.className='c-ins';s.textContent=x.u.t+' ';s.onclick=()=>jump(x.id)}
-else{const oB=bare(x.o.t),uB=bare(x.u.t);if(oB===uB){const oP=x.o.t.replace(oB,''),uP=x.u.t.replace(uB,'');s.innerHTML=`${uB}<span class="c-del">${oP}</span><span class="c-ins">${uP}</span> `}else{s.className='c-grp';s.innerHTML=`<span class="${x.val>=1?'c-sub-f':'c-sub-h'}">${x.u.t}<span class="c-cor">(${x.o.t})</span></span> `}s.onclick=()=>jump(x.id)}
+else{if(x.val>=1&&x.w>=1){s.innerHTML=`<span class="c-del">${x.o.t}</span> <span class="c-ins">${x.u.t}</span> `}else{const [ow,op]=splitPun(x.o.t),[uw,up]=splitPun(x.u.t);let h=bare(ow)===bare(uw)?`<span class="c-ok">${uw}</span><span class="c-del">${op}</span>`:`<span class="c-sub-h">${uw}</span>`;s.className='c-grp';s.innerHTML=`${h}<span class="c-cor">(${x.o.t})</span> `}s.onclick=()=>jump(x.id)}
 v.appendChild(s)})}
 function renEL(){const l=$('eL');l.innerHTML='';errs.forEach(e=>{const it=document.createElement('div');it.className='e-it';it.id=`err-${e.id}`;it.onclick=()=>jump(e.id);
 it.innerHTML=`<div class="row" style="margin:0"><span class="e-ctx">${getCtx(oToks,e.i,2,-1)}</span><span class="e-w ${e.val>=1?'m-err':(e.t==='f'?'c-ins':(e.t==='m'?'c-del':'m-h'))}">${e.t==='m'?e.o.t:e.u.t}</span><span class="e-ctx">${getCtx(oToks,e.i,2,1)}</span><span style="font-size:9px;opacity:0.7;margin-left:auto">(-${e.val})</span></div>
