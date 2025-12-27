@@ -1,7 +1,3 @@
-{
-type: uploaded file
-fileName: checker.js
-fullContent:
 function opTr(){if(!$('tx').value.trim()&&exMode!=='mock'){alert('Load text first!');return}if(is){au.pause();is=0;updatePlBtn()}$('trM').classList.add('active');resTr();$('trA').disabled=0}
 function tryClTr(){if(exMode==='mock'&&trIp){return}if($('rsV').style.display==='flex'){$('trM').classList.remove('active');return}if(trIp||$('trI').value.length>0){$('cfm').style.display='flex'}else{$('trM').classList.remove('active')}}
 function cfmAct(a){$('cfm').style.display='none';if(a==='d'){$('trM').classList.remove('active');resTr()}else if(a==='s'){subTr()}}
@@ -14,5 +10,3 @@ function renCheckV(){const v=$('checkV');v.innerHTML='';$('rS').style.display='n
 function showAct(k,x,y){const d=$('actM')||document.createElement('div');d.id='actM';d.className='ctx-menu';d.innerHTML=`<div onclick="modEr(${k},'f')">Full Err</div><div onclick="modEr(${k},'h')">Half Err</div><div onclick="modEr(${k},'i')">Ignore</div>`;document.body.appendChild(d);d.style.left=x+'px';d.style.top=y+'px';const cl=()=>{d.remove();document.removeEventListener('click',cl)};setTimeout(()=>document.addEventListener('click',cl),10)}
 function modEr(k,a){const e=diffs[k];if(a==='f'){e.t='s';e.v=1}else if(a==='h'){e.t='h';e.v=0.5}else{e.t='ok';e.v=0}reCalc()}
 function refine(){$('rsV').style.display='none';$('trV').style.display='flex';$('trI').disabled=0;$('trI').focus()}
-
-}
