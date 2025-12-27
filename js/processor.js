@@ -1,22 +1,8 @@
-const nrm=(s)=>s.normalize('NFC').replace(/[\u200B-\u200D\uFEFF]/g,m=>((m==='\u200D'||m==='\u200C')?m:'')).replace(/[०-९]/g,d=>'०१२३४५६७८९'.indexOf(d));
-const getPhon=(s)=>{
-let p=nrm(s).replace(/[\u093C]/g,'');
-p=p.replace(/[\u0901\u0902]/g,'N').replace(/[\u0941\u0942]/g,'U').replace(/[\u093F\u0940]/g,'I').replace(/[\u0947\u0948]/g,'E').replace(/[\u094B\u094C]/g,'O');
-return p.replace(/[\u094D]/g,'');
-};
-const isSim=(a,b)=>{
-if(!a||!b)return false;const s1=bare(a),s2=bare(b);if(s1===s2)return true;
-const suff=['ओं','ों','ां','े','ी','ा','ू'];
-const r1=suff.reduce((s,f)=>s.endsWith(f)?s.slice(0,-f.length):s,s1);
-const r2=suff.reduce((s,f)=>s.endsWith(f)?s.slice(0,-f.length):s,s2);
-if(r1===r2&&r1.length>1)return true;
-let d=0,l=Math.max(s1.length,s2.length);for(let i=0;i<Math.min(s1.length,s2.length);i++)if(s1[i]!==s2[i])d++;
-return (d+(l-Math.min(s1.length,s2.length)))<=2;
-};
-const tok=(t)=>{
-let r=[],re=/([\u0900-\u097F][\u093C]?[\u094D]?)+|[^\s\u0900-\u097F]+/g,m;
-while((m=re.exec(t))!==null){const s=nrm(m[0]);r.push({t:s,p:getPhon(s),s:m.index,e:re.lastIndex})}
-return r;
-};
 const clean=(s)=>s.replace(/[\u2018\u2019\u201c\u201d]/g,"'").replace(/[\u2013\u2014]/g,"-").trim();
-const bare=(s)=>clean(s).replace(/[.।!?;:,|]/g,'');
+const tok=(t)=>{let r=[],re=/\S+/g,m;while((m=re.exec(t))!==null)r.push({t:m[0],s:m.index,e:re.lastIndex});return r};
+const norm=(s)=>s.normalize('NFC').replace(/[०-९]/g,c=>String.fromCharCode(c.charCodeAt(0)-2406)).replace(/\u0901/g,'\u0902').replace(/\u093c/g,'').replace(/[\u200B-\u200D]/g,'').toLowerCase().replace(/[^\w\u0900-\u097F]/g,'');
+const stem=(s)=>s.replace(/(ों|ियों|ae|ना|ता|ती)$/,'');
+const lev=(a,b)=>{const m=a.length,n=b.length,d=Array(n+1).fill(0).map((_,i)=>i);for(let i=1;i<=m;i++){let p=d[0];d[0]=i;for(let j=1;j<=n;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[n]};
+const cmp=(o,u)=>{const no=norm(o),nu=norm(u);if(no===nu)return 0;if(clean(o)===clean(u))return 0;if(stem(no)===stem(nu))return 0.5;const l=lev(no,nu);if(l<=1||(no.length>4&&l<=2))return 0.5;return 1};
+function upWC(force=false){const t=$('tx').value.trim(),l=exRules.wc||$('lg').value;let w=0;if(t){if(l==='s')w=t.replace(/\s/g,'').length/5;else if(l==='sp')w=(t.length-t.split(/\s+/).length+1)/5;else if(l==='p'){const tk=t.split(/\s+/);let sm=0,lg=0;tk.forEach(x=>{if(x.match(/[,;]/))sm++;if(x.match(/[.?!|\u0964]/))lg++});w=tk.length+(sm*0.5)+(lg*1)}else w=t.split(/\s+/).length}const val=Math.ceil(w);$('wc').value=val;$('st').textContent='W: '+val;if(force||val>0)sync('w');updateStatus()}
+function cropTxt(pos,cnt){if(!origTxt)origTxt=$('tx').value;const t=origTxt.split(/\s+/);if(t.length<=cnt){$('tx').value=origTxt;return}let sl;if(pos===0)sl=t.slice(0,cnt+20);else if(pos==='mid'){const mid=Math.floor(t.length/2);sl=t.slice(mid-(cnt/2),mid+(cnt/2)+20)}else sl=t.slice(t.length-cnt-20);$('tx').value=sl.join(' ')+' ...';upWC(true)}
