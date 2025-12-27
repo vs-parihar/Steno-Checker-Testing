@@ -1,95 +1,144 @@
-# 🎙️ Steno Professional: Technical Architecture & Documentation
 
-A modular, high-performance web suite for Shorthand (Steno) training, evaluation, and exam simulation. This project is split into 7 specialized files to ensure easy management, scalability, and clean GitHub deployment.
+```
+# ⌨️ Steno Player & Exam Simulation Engine - Documentation
+
+This project is a professional-grade stenography practice and examination suite. It is designed to bridge the gap between casual practice and the high-pressure environment of official shorthand exams.
+
+
 
 ---
 
-## 📂 1. File Responsibilities
+## 📂 File Directory Overview
 
-| File | Type | Primary Role |
-| :--- | :--- | :--- |
-| `index.html` | Structural | UI Shell, layout of controls, and all modal layers. |
-| `style.css` | Design | Dynamic theming, UI scaling, and responsive constraints. |
-| `config.js` | Data/State | Global variables, exam rule definitions, and library sources. |
-| `audio-engine.js` | Audio | Web Audio API management, pitch/rate control, and WAV export. |
-| `processor.js` | Logic | The "Brain". Handles text alignment and error grading algorithms. |
-| `mock-engine.js` | Behavioral | Manages the sequence of strict Exam/Mock scenarios. |
-| `ui-controller.js` | Bridge | Connects DOM events to logic; handles rendering and result navigation. |
+### 1. Core Files
+* **`index.html`**: The UI entry point. Contains the layout for the Player, Transcribe Modal, and Exam Setup.
+* **`style.css`**: Manages the "Steno-Dark" and "Steno-Light" themes, responsive layout, and the "Red-Yellow-Green" error highlighting system.
 
----
-
-## 🛠️ Detailed Function Reference
-
-### 📁 `processor.js` (The Analysis Engine)
-This file performs the complex task of aligning user-typed text with the original script to detect errors.
-
-* **`clean(text)`**
-    * **What**: Standardizes Unicode characters.
-    * **How**: Uses Regex to replace "smart" quotes (`“”`), em-dashes (`—`), and unique Hindi symbols with standard ASCII equivalents to prevent invisible character-code mismatches.
-* **`bare(text)`**
-    * **What**: Creates a "Normal Form" for word comparison.
-    * **How**: Lowercases text and strips all punctuation (`. , ! ? ।`). This allows the engine to verify if a word is correct even if the user missed a comma or full stop.
-* **`tok(text)`**
-    * **What**: A position-aware tokenizer.
-    * **How**: Generates an array of objects `{t: word, s: start_index, e: end_index}`. This indexing is critical for the "Jump to Error" feature.
-* **`subTr()` (The Alignment Logic)**
-    * **What**: Implements the **Longest Common Subsequence (LCS)** algorithm via Dynamic Programming.
-    * **How**: It builds a 2D matrix comparing the original passage (M) vs. user input (N). It identifies the optimal path of correct words, flagging gaps as "Omissions" and extra user words as "Additions."
-    * **Context Logic**: Includes a "Hindi Homophone" map (e.g., `में` vs `मैं`) to prevent the algorithm from losing alignment on common phonetic spelling errors.
-* **`reCalc()`**
-    * **What**: Final Score Calculator.
-    * **How**: Iterates through the detected differences and applies numerical weights (1.0 for Full, 0.5 for Half) defined in the chosen exam profile.
-
-
-
-### 📁 `audio-engine.js` (Signal Processing)
-Interacts with the Browser's Audio Context for high-fidelity control.
-
-* **`beeps()`**: Synthesizes a 3-count 880Hz beep using a Web Audio `OscillatorNode` to signal the start of a timed test without needing external MP3 files.
-* **`upV()`**: Updates the `GainNode` value. Supports "Boosting" (up to 200% volume) to help students hear low-quality dictation recordings.
-* **`expA()` (The WAV Renderer)**:
-    * **What**: Creates a speed-adjusted audio file for offline use.
-    * **How**: Uses an `OfflineAudioContext` to re-sample the original buffer at a different `playbackRate` based on the user's target WPM. It then encodes this as a high-fidelity Blob.
-* **`sk(val)`**: Directly modifies the `currentTime` of the audio element for seek operations (+5s, -10s, etc.).
-
-### 📁 `mock-engine.js` (The Exam Controller)
-Implements a strict state machine to simulate official exam conditions.
-
-* **`startMock()`**: Disables the transcription area and triggers the full-screen Mock Overlay to prevent users from seeing the text during dictation.
-* **`nextMockStep()`**: 
-    * **State 1 (Dictation)**: Plays audio; hides text input.
-    * **State 2 (Reading)**: Stops audio; triggers a countdown (usually 10 mins) for reading shorthand notes from paper.
-    * **State 3 (Transcription)**: Opens the transcription UI and starts the hard-limit countdown. Auto-submits when time reaches zero.
-* **`setCrp(pos)`**: Intelligent cropping. If a dictation file is 15 minutes long but the exam is only 10, it calculates the sample offset to play only the Start, Middle, or End segment.
-
-### 📁 `ui-controller.js` (The UI Bridge)
-* **`renL()`**: Uses `.filter()` and `.sort()` on the `regs` JSON library data to render the searchable library list.
-* **`jump(k)`**: Calculates the scroll offset for the `k-th` error and uses `.setSelectionRange()` and `scrollIntoView()` to focus the user's cursor on the mistake in the text area.
-* **`toggleTheme()`**: Swaps the CSS variable definitions by adding/removing the `.light-mode` class from the `<body>` element.
+### 2. JavaScript Modules (`js/`)
+* **`config.js`**: Stores the global state, registry URLs, and the Exam Rule Master-list.
+* **`processor.js`**: Handles text cleaning, word counting logic, and text cropping.
+* **`audio-engine.js`**: Manages the Web Audio API, real-time WPM calculation, and HQ audio exporting.
+* **`ui-controller.js`**: Handles the Library (Gist) fetching, filtering, and theme toggling.
+* **`mock-engine.js`**: The state machine that runs the automated Exam workflow.
+* **`checker.js`**: The "Brain" of the app. It compares typed text vs. original text using a modified Diff algorithm.
 
 ---
 
-## 📊 Evaluation Mathematics (SSC Standard)
+## 📊 Data Format Schemas
 
-The system calculates accuracy based on the following standard weights:
+To manage your own audio libraries or exams, follow these formats:
 
-1.  **Full Error (1.0 weight)**: Omissions, substitutions, or extra additions of words.
-2.  **Half Error (0.5 weight)**: Capitalization, minor spelling mistakes, or punctuation errors.
+### A. Registry & Playlist (JSON)
+The app fetches JSON from GitHub Gists. Each item should follow this structure:
+```json
+{
+  "title": "80 WPM - Legal Matter - Case 101",
+  "url": "[https://archive.org/details/audio_id](https://archive.org/details/audio_id)",
+  "audio": "[https://direct-link-to-audio.mp3](https://direct-link-to-audio.mp3)",
+  "matter": "[https://direct-link-to-text.txt](https://direct-link-to-text.txt)",
+  "dur": 600, 
+  "w": [800, 780, 810],
+  "tags": ["LEGAL", "80WPM", "SSC"]
+}
 
-**Formula:**
-$$Accuracy \% = 100 - \left( \frac{\text{Full Errors} + (\text{Half Errors} \times 0.5)}{\text{Total Words in Passage}} \times 100 \right)$$
+```
+
+* **`w` array**: `[Standard Count, Space Count, Word Count]`. The app selects the correct one based on your logic settings.
+
+### B. Exam Rule Schema (in `config.js`)
+
+Exams are defined by their constraints:
+
+```javascript
+ssc_d: {
+  name: 'SSC Gr D',
+  wpm: 80,       // Target Speed
+  dur: 10,       // Dictation minutes
+  read: 10,      // Reading time minutes
+  trans: 65,     // Transcription time minutes
+  rules: {
+    cap: 1,      // 1 = Full error for capitalization
+    com: 1,      // 1 = Full error for comma
+    pun: 1,      // 1 = Full error for punctuation
+    spl: 1,      // 1 = Full error for spelling/half-mistake
+    sub: 's',    // 's' = Single error for substitution, 'd' = Double
+    wc: 's',     // 's' = Standard (5 chars), 'sp' = Space, 'p' = Punc
+    max: 5       // Maximum error % allowed to pass
+  }
+}
+
+```
 
 ---
 
-## 🚀 GitHub Deployment Guide
+## 🧠 Deep Dive: How the Checker Works
 
-1.  **Initialize**: Create a new repository and upload all 7 files.
-2.  **Configuration**: Open `config.js` and update the `regs` array with your own JSON audio library links.
-3.  **Enable Pages**: Go to **Settings > Pages** and select the `main` branch to deploy.
-4.  **CORS Security**: Ensure your audio hosting server allows `Access-Control-Allow-Origin: *` so the audio processor can read the file data for WAV rendering.
+The `checker.js` uses a **Dynamic Programming (DP)** approach to find the **Longest Common Subsequence (LCS)** between the original text and your transcription.
 
-### Local Testing
-Since browsers block the File API on `file://` protocols, run a local server:
-```bash
-# Using Python
-python -m http.server 8000
+### 1. Pre-Processing
+
+Before comparing, the engine runs `bare()`:
+
+* Converts all text to lowercase.
+* Removes special symbols (`. ! ? ; : , |`).
+* Normalizes Hindi characters (e.g., matching `में` and `मैं` as potential half-errors).
+
+### 2. The DP Matrix
+
+It creates a grid to find the most logical path between what you typed and what was said.
+
+* **Match**: No error.
+* **Substitution**: If words are different but in the same position.
+* **Omission (Missing)**: If a word exists in source but not in user input.
+* **Insertion (Extra)**: If the user typed a word not in the source.
+
+### 3. Error Weightage
+
+The final score isn't just `errors / total`. It applies the `exRules`:
+
+* **Full Mistake (1.0)**: Omission, Substitution, or adding a word that wasn't there.
+* **Half Mistake (0.5)**: Based on settings, things like "The" vs "the" or "comma" errors can be treated as 0.5.
+
+---
+
+## ⏱️ The Mock Test Workflow
+
+When you select an exam and enter **Mock Mode**, the `mock-engine.js` takes control:
+
+1. **Preparation**: The app automatically sets the WPM and Playback Rate to match the exam standard.
+2. **Cropping**: If the audio file is 15 minutes but the exam is 10, the app asks if you want the *Start, Middle, or End*. It then crops the reference text to match exactly what you will hear.
+3. **Phase 1: Dictation**: The screen locks. You only see a timer and the "Stop" button. Text is hidden.
+4. **Phase 2: Reading Time**: Once audio ends, a countdown starts (e.g., 10 mins). This is for you to read your shorthand notes.
+5. **Phase 3: Transcription**: The transcription modal opens automatically. The timer starts. You cannot paste text into this box.
+6. **Phase 4: Auto-Submit**: When the timer hits `00:00`, the box locks and the result is calculated immediately.
+
+---
+
+## 🛠️ Advanced Functions Reference
+
+| Function | File | Description |
+| --- | --- | --- |
+| `expA()` | `audio-engine.js` | Uses an `OfflineAudioContext` to render a new audio file at your current speed. Extremely useful for creating custom-speed practice sets. |
+| `sync('w')` | `ui-controller.js` | Calculates the exact mathematical playback rate required to turn a 70 WPM audio into an 85 WPM audio. |
+| `jump(k)` | `checker.js` | When you click an error in the result list, this function calculates the scroll offset to highlight the exact word in both the original and your typed version. |
+| `beeps()` | `audio-engine.js` | Uses an `OscillatorNode` to generate 880Hz tones. Does not rely on external MP3 files for the countdown. |
+
+---
+
+## 🔧 Management & Customization
+
+### Changing the Theme
+
+Modify the CSS variables in `style.css` under `.light-mode`. You can change the highlight colors (e.g., making omissions Blue instead of Yellow).
+
+### Adding New Exams
+
+Simply add a new entry to the `exams` object in `js/config.js`. The UI will automatically detect the new entry and add it to the "Select Exam" dropdown.
+
+### Deployment
+
+This app is "Serverless." Simply push to GitHub Pages. It uses `fetch` to get data, so ensure your Gists are Public.
+
+```
+
+```
