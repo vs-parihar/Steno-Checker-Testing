@@ -1,6 +1,6 @@
 const nrm=s=>{if(!s)return'';let r=s.normalize('NFC').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\u093C/g,'').replace(/[\u0902\u0901]/g,'\u0902').replace(/[०-९]/g,d=>'0123456789'[d.charCodeAt(0)-2406]).trim();return r.replace(/^मै$/,'में').replace(/^में$/,'मै')};
-const bare=s=>nrm(s).replace(/,/g,'').replace(/[^\w\u0900-\u097F\u0964|\-]/g,'').toLowerCase();
-const tok=t=>{let r=[],re=/\S+/g,m;while((m=re.exec(t)))r.push({t:m[0],s:m.index,e:re.lastIndex});return r};
+const bare=s=>nrm(s).replace(/[^\w\u0900-\u097F\u0964|\-]/g,'').toLowerCase();
+const tok=t=>{if(!t)return[];const c=t.replace(/([,;!.?|"\-])/g,' $1 ');let r=[],re=/\S+/g,m;while((m=re.exec(c)))r.push({t:m[0],s:m.index,e:re.lastIndex});return r};
 const stm=w=>{let s=nrm(w);if(s.length<4)return s;return s.replace(/(?:ओं|ियों|ों|एं|ाएं|िया|ि|ी|ा|े|ू|\u094d)$/,'')};
 const lev=(a,b)=>{const m=a.length,n=b.length,d=Array(n+1).fill(0).map((_,i)=>i);for(let i=1;i<=m;i++){let p=d[0];d[0]=i;for(let j=1;j<=n;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[n]};
 const cmpW=(o,u)=>{const O=bare(o),U=bare(u);if(O===U)return 0;const l=Math.max(O.length,U.length),d=lev(O,U);if(stm(O)===stm(U))return 0.5;if(l>=3&&d===1)return 0.5;if(l>5&&d<=2)return 0.5;const pO=O.replace(/[इई]/g,'इ').replace(/[उऊ]/g,'उ').replace(/[शषस]/g,'स').replace(/[बव]/g,'ब'),pU=U.replace(/[इई]/g,'इ').replace(/[उऊ]/g,'उ').replace(/[शषस]/g,'स').replace(/[बव]/g,'ब');if(pO===pU)return 0.5;return 1};
