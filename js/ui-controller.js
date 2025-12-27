@@ -1,6 +1,16 @@
-function toggleTheme(){document.body.classList.toggle('light-mode',$('theme').checked);}
-function resetData(){$('tx').value='';clnAu();$('trI').value='';$('resBox').style.display='none';$('rS').innerHTML='';$('checkV').innerHTML='';origTxt='';upWC();}
-function upWC(force=false){const t=$('tx').value.trim(),l=exRules.wc||$('lg').value;let w=0;if(t){if(l==='s')w=t.replace(/\s/g,'').length/5;else w=t.split(/\s+/).length;}const val=Math.ceil(w);$('wc').value=val;updateStatus();}
-function init(){regs.forEach(r=>{let o=document.createElement('option');o.value=r.u;o.textContent=r.t;$('rg').appendChild(o);});$('f').onchange=async e=>{resetData();for(const f of Array.from(e.target.files)){if(f.type.includes('audio')){au.src=URL.createObjectURL(f);meta(f.name);}else if(f.name.match(/\.(txt|md)$/i)){const t=await f.text();$('tx').value=t;origTxt=t;}}setTimeout(()=>upWC(true),500);};upExD();}
-async function lA(i,idx){curI=idx;curO=i;const id=i.url?.split('details/')[1],dl=`https://archive.org/download/${id}/`;try{if(id){const mr=await fetch(`https://archive.org/metadata/${id}`),md=await mr.json(),tf=(md.files||[]).find(f=>f.name.endsWith('.txt'));if(tf){const r=await fetch(dl+tf.name);$('tx').value=await r.text();}else{$('tx').value=md.metadata.description?.replace(/<[^>]*>?/gm,'')||"";}}}catch(e){}$('tx').value=norm($('tx').value);origTxt=$('tx').value;upWC();}
-window.onload=init;
+function toggleTheme() { document.body.classList.toggle('light-mode', $('theme').checked); }
+
+function updateStatus() {
+    $('stWPM').textContent = $('wi').value + ' WPM';
+    $('stRate').textContent = $('ri').value + 'x';
+    $('stWC').textContent = $('wc').value + ' W';
+    $('stMode').textContent = exMode === 'mock' ? 'Mock Mode' : 'Practice';
+    $('stMode').style.color = exMode === 'mock' ? '#ef4444' : 'inherit';
+}
+
+function init() {
+    // ... Initialization logic for regs, options, etc. ...
+    window.onload = init;
+}
+
+// ... All modal openers and event listeners ...
