@@ -114,19 +114,20 @@
         <div class="row" style="background:var(--inp-bg);padding:4px;border-bottom:1px solid var(--bd);align-items:center"><b>Exam Setup</b><button onclick="$('exM').classList.remove('active')" class="cls-btn" style="margin-left:auto">✕</button></div>
         <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
             <div class="row"><label style="width:60px">Exam</label><select id="exSel" style="flex:1" onchange="upExD()"><option value="ssc_d">SSC Gr D</option><option value="ssc_c">SSC Gr C</option><option value="custom">Custom</option></select></div>
-            <div class="row"><label style="width:60px">Mode</label><select id="exMode" style="flex:1" onchange="upExD()"><option value="practice">Practice (Flexible)</option><option value="mock">Mock (Strict)</option></select></div>
-            <div id="custOpts" style="display:none;border:1px solid var(--bd);padding:4px;flex-direction:column;gap:4px">
-                <div class="row"><label style="flex:1">Speed (WPM)</label><input type="number" id="cWpm" value="80" style="width:50px"></div>
-                <div class="row"><label style="flex:1">Dur (Min)</label><input type="number" id="cDur" value="10" style="width:50px"></div>
-                <div class="row"><label style="flex:1">Word Count</label><select id="cLg" style="width:80px"><option value="s">Std (5)</option><option value="sp">Space</option><option value="w">Word</option></select></div>
-                <div class="row"><label style="flex:1">Caps Err</label><select id="cCap" style="width:80px"><option value="0">None</option><option value="0.5">Half</option><option value="1">Full</option></select></div>
-                <div class="row"><label style="flex:1">Comma Err</label><select id="cCom" style="width:80px"><option value="0">None</option><option value="0.5">Half</option><option value="1">Full</option></select></div>
-                <div class="row"><label style="flex:1">Punc Err</label><select id="cPun" style="width:80px"><option value="0">None</option><option value="0.5">Half</option><option value="1">Full</option></select></div>
-                <div class="row"><label style="flex:1">Spell Err</label><select id="cSpl" style="width:80px"><option value="0.5">Half</option><option value="1">Full</option></select></div>
-                <div class="row"><label style="flex:1">Subst Err</label><select id="cSub" style="width:80px"><option value="s">Single</option><option value="d">Double</option></select></div>
-                <div class="row"><label style="flex:1">Max Err %</label><input type="number" id="cMaxE" value="5" style="width:50px"></div>
+            <div class="row"><label style="width:60px">Mode</label><select id="exMode" style="flex:1"><option value="practice">Practice</option><option value="mock">Mock</option></select></div>
+            <div id="custOpts" style="display:flex;flex-direction:column;gap:4px;border:1px solid var(--bd);padding:4px">
+                <div class="row"><label style="flex:1">Speed/Dur</label><input type="number" id="cWpm" value="80" style="width:40px" oninput="$('exSel').value='custom'"><input type="number" id="cDur" value="10" style="width:40px" oninput="$('exSel').value='custom'"></div>
+                <div class="grid-opt">
+                    <div class="g-it"><label class="lbl">Caps</label><select id="cCap" onchange="$('exSel').value='custom'"><option value="0">0</option><option value="0.5">½</option><option value="1">1</option></select></div>
+                    <div class="g-it"><label class="lbl">Comma</label><select id="cCom" onchange="$('exSel').value='custom'"><option value="0">0</option><option value="0.5">½</option><option value="1">1</option></select></div>
+                    <div class="g-it"><label class="lbl">Punc</label><select id="cPun" onchange="$('exSel').value='custom'"><option value="0">0</option><option value="0.5">½</option><option value="1">1</option></select></div>
+                    <div class="g-it"><label class="lbl">Spell</label><select id="cSpl" onchange="$('exSel').value='custom'"><option value="0.5">½</option><option value="1">1</option></select></div>
+                    <div class="g-it"><label class="lbl">Subst</label><select id="cSub" onchange="$('exSel').value='custom'"><option value="s">Sngl</option><option value="d">Dbl</option></select></div>
+                    <div class="g-it"><label class="lbl">Max Err%</label><input type="number" id="cMaxE" value="5" oninput="$('exSel').value='custom'"></div>
+                    <div class="g-it" style="grid-column:1/-1"><label class="lbl">Word Count Logic</label><select id="cLg" onchange="$('exSel').value='custom'"><option value="s">Std (5)</option><option value="sp">Space</option><option value="w">Word</option></select></div>
+                </div>
             </div>
-            <div id="exDesc" style="border:1px solid var(--bd);padding:4px;font-size:11px;color:var(--in);white-space:pre-wrap"></div>
+            <div id="exDesc" style="font-size:10px;color:var(--in);text-align:right"></div>
             <button onclick="selEx()" style="height:36px;border-color:var(--gr);color:var(--gr);font-weight:bold">Next / Apply</button>
         </div>
     </div></div>
@@ -156,7 +157,7 @@
         </div>
         <div id="rsV" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:300px">
             <div id="resBox"><div id="resTit" class="res-big"></div><div id="resDet" class="res-det"></div></div>
-            <div class="row" style="padding:2px;justify-content:center"><label><input type="checkbox" id="chkFull" onchange="reCalc()"> Check Full Text</label></div>
+            <div class="row" id="cfBox" style="padding:2px;justify-content:center;display:none"><label><input type="checkbox" id="chkFull" onchange="reCalc()"> Check Full Text</label></div>
             <div style="display:flex;height:200px;border-bottom:1px solid var(--bd);gap:2px;padding:2px"><div id="checkV" class="res-view"></div></div>
             <div id="eL" style="flex:1;overflow-y:auto;padding:2px"></div>
         </div>
