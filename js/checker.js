@@ -1,8 +1,7 @@
-function subTr() {
-    const srcIn = $('srcIn').value;
-    const tyIn = $('tyIn').value;
-    
-    // Capture config from UI
+const clMo = id => $(id).style.display = 'none';
+
+function opTr() {
+    // Initialize rules from the dropdowns/config
     exRules = {
         spell: parseFloat($('v_spell').value),
         plur: parseFloat($('v_plur').value),
@@ -15,6 +14,28 @@ function subTr() {
         hyphen: parseFloat($('v_hyphen').value),
         miscp: parseFloat($('v_miscp').value)
     };
+
+    $('trMod').style.display = 'flex';
+    let stTi = Date.now();
+    
+    // Clear old timer if exists
+    if (trTi) clearInterval(trTi);
+    
+    trTi = setInterval(() => {
+        let s = Math.floor((Date.now() - stTi) / 1000);
+        $('timer').innerText = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    }, 1000);
+}
+
+function subTr() {
+    if (trTi) clearInterval(trTi);
+    const srcIn = $('srcIn').value;
+    const tyIn = $('tyIn').value;
+
+    if (!srcIn || !tyIn) {
+        alert("Please ensure both source and transcription text are present.");
+        return;
+    }
 
     const resW = diff(srcIn, tyIn);
     const srcWords = srcIn.replace(/([।?.,\-!:;()"'\[\]{}])/g, ' $1 ').split(/\s+/).filter(x => x);
@@ -42,7 +63,7 @@ function subTr() {
 
     $('chOut').innerHTML = h;
     reEr(srcWords);
-    $('trMod').style.display = 'none';
+    clMo('trMod');
     $('reMod').style.display = 'flex';
 }
 
@@ -74,19 +95,9 @@ function reEr(srcWords) {
     $('stHe').innerHTML = `<span>Penalty: ${tt.toFixed(1)}</span><span style="font-weight:bold;color:var(--fix)">Acc: ${Math.max(0, 100 - (tt / srcWords.length * 100)).toFixed(2)}%</span>`;
 }
 
-function hiE(i) {
-    document.querySelectorAll('.err-item').forEach(l => l.classList.remove('active'));
-    document.querySelectorAll('#chOut span').forEach(s => s.classList.remove('ctx-hi'));
-    const e = errs[i], li = document.getElementById(`li-${i}`);
-    if (li) {
-        li.classList.add('active');
-        li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    for (let k = 1; k <= 2; k++) {
-        let p = document.getElementById(`t-${e.idx - k}`), n = document.getElementById(`t-${e.idx + k}`);
-        if (p) p.classList.add('ctx-hi');
-        if (n) n.classList.add('ctx-hi');
-    }
-    const cur = document.getElementById(`t-${e.idx}`);
-    if (cur) cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// Audio placeholder function - ensure your HTML has an <audio id="au"> element
+function playAu(url) {
+    if (!au) return;
+    au.src = url;
+    au.play();
 }
