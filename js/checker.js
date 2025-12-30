@@ -1,7 +1,3 @@
-{
-type: uploaded file
-fileName: checker.js
-fullContent:
 function opTr(){
     // 1. Sync Source Text: If origTxt is empty (manual typing), grab it from the main textarea
     if((!origTxt || origTxt.length < $('tx').value.length) && $('tx').value.length > 0){
@@ -288,5 +284,4 @@ function upEr(ev,i,v){
         renderResult();
         hiE(i);
     }
-}
 }
