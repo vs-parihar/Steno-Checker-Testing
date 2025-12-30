@@ -1,10 +1,14 @@
-fullContent:
-let ac,sr,gn,is=0,curL=[],filtL=[],curI=-1,bpAb=null,curO={},curS=1,curT=14,maxW=0,trTi=null,trRem=0,trElap=0,trStopW=0,trDur=0,trIp=0,errs=[],srcWords=[],resW=[],activeIdx=-1,lastAuSrc=null;
-let exMode='practice',curEx='custom',mockState=0,mockTimer=null,exRules={},crpS=0,crpE=0,origTxt='';
-let checkConfig={spell:0.5,plur:0.5,sub:1,comma:0,punc:0.5,ins:1,mis:1,split:0.5,hyphen:0,miscp:0};
-const $=(i)=>document.getElementById(i),au=$('au'),regs=[{u:"d82c26e4cb069d8f5b9d1f2a5cf42e24",t:"Eng"},{u:"363e6ce7f8e1b41be69bba7623c7c320",t:"Hin"}];
-const exams={
-ssc_d:{name:'SSC Gr D',wpm:80,dur:10,read:10,trans:65,lg:'ssc',rules:{cap:1,com:1,pun:1,spl:1,sub:'s',wc:'s',max:5}},
-ssc_c:{name:'SSC Gr C',wpm:100,dur:10,read:10,trans:40,lg:'ssc',rules:{cap:1,com:1,pun:1,spl:1,sub:'s',wc:'s',max:5}},
-custom:{name:'Custom',wpm:80,dur:10,read:0,trans:0,lg:'std',rules:{cap:0,com:0,pun:0.5,spl:0.5,sub:'s',wc:'s',max:100}}
+let ac, sr, gn, is = 0, curL = [], filtL = [], curI = -1, bpAb = null, curO = {}, curS = 1, curT = 14;
+let maxW = 0, trTi = null, trRem = 0, trElap = 0, trStopW = 0, trDur = 0, trIp = 0;
+let errs = [], oToks = [], uToks = [], lastAuSrc = null;
+let exMode = 'practice', curEx = 'custom', mockState = 0, mockTimer = null, exRules = {}, crpS = 0, crpE = 0, origTxt = '';
+let showNorm = false;
+
+const $ = (i) => document.getElementById(i);
+const au = $('au');
+
+const exams = {
+    ssc_d: { name: 'SSC Gr D', wpm: 80, dur: 10, read: 10, trans: 65, lg: 'ssc', rules: { cap: 1, com: 1, pun: 1, spl: 1, sub: 's', wc: 's', max: 5 } },
+    ssc_c: { name: 'SSC Gr C', wpm: 100, dur: 10, read: 10, trans: 40, lg: 'ssc', rules: { cap: 1, com: 1, pun: 1, spl: 1, sub: 's', wc: 's', max: 5 } },
+    custom: { name: 'Custom', wpm: 80, dur: 10, read: 0, trans: 0, lg: 'std', rules: { cap: 0, com: 0, pun: 0.5, spl: 0.5, sub: 's', wc: 's', max: 100 } }
 };
