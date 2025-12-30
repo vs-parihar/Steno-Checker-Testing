@@ -1,3 +1,4 @@
+fullContent:
 let ac,sr,gn,is=0,curL=[],filtL=[],curI=-1,bpAb=null,curO={},curS=1,curT=14,maxW=0,trTi=null,trRem=0,trElap=0,trStopW=0,trDur=0,trIp=0,errs=[],srcWords=[],resW=[],activeIdx=-1,lastAuSrc=null;
 let exMode='practice',curEx='custom',mockState=0,mockTimer=null,exRules={},crpS=0,crpE=0,origTxt='';
 let checkConfig={spell:0.5,plur:0.5,sub:1,comma:0,punc:0.5,ins:1,mis:1,split:0.5,hyphen:0,miscp:0};
